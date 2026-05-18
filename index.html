@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Brain Superpowers Game</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg1:#23064d; --bg2:#100326; --bg3:#05091f;
+  --yellow:#ffe66d; --pink:#ff66c4; --purple:#8b5cf6;
+  --frontal:#ff8a1f; --temporal:#a855f7; --parietal:#18c8d6; --occipital:#ff5363; --cerebellum:#ffd21f; --stem:#d8b98d;
+}
+body{
+  min-height:100vh;color:white;overflow-x:hidden;
+  font-family:'Comic Sans MS','Chalkboard SE','Trebuchet MS',system-ui,sans-serif;
+  background:radial-gradient(circle at 50% 6%,#34106b 0%,#170533 46%,#080c25 100%);
+}
+#app{max-width:1180px;margin:0 auto;padding:18px 14px 34px}
+.ttl{text-align:center;font-size:clamp(2.1rem,6vw,4rem);line-height:1;color:var(--yellow);letter-spacing:.5px;text-shadow:0 0 18px #ff5ecb,0 5px 0 #b05a00;margin-bottom:8px}
+.sub{text-align:center;font-size:clamp(.9rem,2vw,1.15rem);color:#e5d8ff;margin-bottom:14px}
+.top-bar{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.atog,.lab-btn{display:flex;align-items:center;gap:8px;border-radius:999px;padding:9px 18px;cursor:pointer;font-family:inherit;font-weight:700;font-size:.95rem;transition:.2s ease;border:2px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:#d9c9ff}
+.atog:hover,.lab-btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.14)}
+.atog.muted{opacity:.62;border-style:dashed}.lab-btn{border-color:#54e08f;color:#8cffb8;background:rgba(84,224,143,.12)}
+.meter-wrap{max-width:720px;margin:0 auto 12px}.meter-row{display:flex;justify-content:space-between;align-items:center;color:#e9dcff;font-size:.9rem;margin-bottom:6px;font-weight:700}.meter-bar{height:24px;border-radius:999px;border:3px solid #9b59ff;background:rgba(255,255,255,.07);overflow:hidden}.meter-fill{height:100%;width:0%;min-width:42px;border-radius:999px;background:linear-gradient(90deg,#ff68d4,#ff9be4,#ffe66d);display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:.75rem;font-weight:900;transition:width .7s cubic-bezier(.22,.61,.36,1)}.prog-msg{text-align:center;color:#e8d9ff;margin-top:7px;font-weight:700;font-size:.95rem}
+.badge-tray{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin:14px 0 8px}.badge{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);border:3px solid rgba(255,255,255,.16);font-size:1.7rem;position:relative;transition:.2s ease}.badge .tip{display:none;position:absolute;bottom:110%;left:50%;transform:translateX(-50%);padding:4px 8px;border-radius:8px;background:#14042d;border:1px solid #8c5bff;color:#fff;font-size:.65rem;white-space:nowrap}.badge:hover .tip{display:block}.badge.earned{background:linear-gradient(135deg,#ffe66d,#ff9e1f);border-color:#ffe66d;transform:scale(1.12);animation:bpop .45s ease}
+@keyframes bpop{0%{transform:scale(0) rotate(-30deg)}70%{transform:scale(1.22)}100%{transform:scale(1.12)}}
+.brain-stage{position:relative;width:100%;margin:6px auto 0;border-radius:30px;padding:4px 0 0}.brain-outer{width:100%;max-width:1120px;margin:0 auto 8px;padding:8px 4px 4px}.brain-outer svg{width:100%;display:block;overflow:visible}.lobe{cursor:pointer;transition:filter .18s ease,transform .18s ease;transform-box:fill-box;transform-origin:center}.lobe:hover{filter:brightness(1.12) drop-shadow(0 0 10px rgba(255,255,255,.45));transform:translateY(-1px)}.hit{fill:transparent;pointer-events:all;cursor:pointer}.brain-label{font-family:'Comic Sans MS','Chalkboard SE',system-ui,sans-serif;font-weight:900;fill:white;stroke:#18082f;stroke-width:5px;paint-order:stroke;letter-spacing:.2px}.brain-label.small{font-size:18px}.brain-label.big{font-size:29px}.brain-label.icon{font-size:34px;stroke-width:3px}.brain-fold{fill:none;stroke:rgba(40,12,45,.42);stroke-width:3.2;stroke-linecap:round;opacity:.72}.brain-fold.light{stroke:rgba(255,255,255,.20);stroke-width:2.1}.cereb-fold{fill:none;stroke:rgba(112,78,0,.55);stroke-width:2.4;stroke-linecap:round}
+.legend{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin:16px 0 12px}.lgbtn{display:flex;align-items:center;gap:8px;border:3px solid;border-radius:999px;padding:9px 18px;cursor:pointer;font-family:inherit;font-size:clamp(.8rem,1.5vw,1rem);font-weight:900;background:rgba(10,5,30,.65);color:white;transition:.14s ease;white-space:nowrap}.lgbtn:hover{transform:scale(1.05);filter:brightness(1.12)}.tips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px}.tip{background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.13);border-radius:12px;padding:8px 12px;font-size:clamp(.72rem,1.25vw,.9rem);color:#e2d7ff;display:flex;align-items:center;gap:6px}
+.ov{display:none;position:fixed;inset:0;background:rgba(5,0,20,.91);z-index:100;align-items:center;justify-content:center;padding:12px}.ov.show{display:flex}.panel{background:linear-gradient(150deg,#17053d,#061944);border:3px solid;border-radius:26px;padding:20px 20px 18px;max-width:700px;width:100%;max-height:95vh;overflow-y:auto;position:relative;box-shadow:0 20px 80px rgba(0,0,0,.4)}.pcls{position:absolute;top:12px;right:14px;width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,.12);color:white;font-size:1.1rem;cursor:pointer;font-family:inherit}.pcls:hover{background:rgba(255,255,255,.22)}.ph{display:flex;align-items:center;gap:12px;margin-bottom:12px}.pibox{width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:2.2rem;background:rgba(255,255,255,.08);border:3px solid;position:relative;flex-shrink:0}.pispk{position:absolute;right:-7px;bottom:-7px;width:26px;height:26px;border-radius:50%;border:2px solid;background:#0d1540;color:white;cursor:pointer;font-size:.85rem}.ptitle{font-size:clamp(1.2rem,3vw,1.7rem);font-weight:900}.psub{font-size:.82rem;color:#c9b3ff}.pdesc{background:rgba(255,255,255,.07);border-radius:14px;padding:12px 14px;font-size:.95rem;line-height:1.55;margin-bottom:10px}.pfact{border-radius:13px;padding:10px 12px;font-size:.88rem;line-height:1.45;margin-bottom:12px;display:flex;gap:8px}.pfact .fi{font-size:1.15rem}.mgwrap{border-radius:18px;padding:14px;background:rgba(255,255,255,.055);border-top:1.5px solid rgba(255,255,255,.1)}.mgtitle{text-align:center;font-size:1rem;font-weight:900;margin-bottom:12px}.mgbody{min-height:245px;display:flex;flex-direction:column;align-items:center;justify-content:center}.gb{background:rgba(255,255,255,.12);border:2.5px solid rgba(255,255,255,.28);border-radius:16px;color:white;font-family:inherit;font-size:1rem;padding:11px 18px;margin:5px;cursor:pointer;transition:.14s ease}.gb:hover{background:rgba(255,255,255,.22);transform:scale(1.04)}.gb.start-btn{font-size:1.28rem;padding:14px 34px;border-color:rgba(100,200,255,.6);background:rgba(100,200,255,.16)}.mg-result{font-size:1.12rem;text-align:center;padding:14px;border-radius:14px;margin-top:10px;width:100%;line-height:1.45}.mg-result.win{background:rgba(80,220,100,.18);color:#b5ffbf}.mg-result.lose{background:rgba(255,180,80,.18);color:#ffe0a0}.seq-display{font-size:clamp(2rem,5vw,3rem);letter-spacing:8px;min-height:72px;background:rgba(255,255,255,.08);border-radius:18px;padding:12px 16px;margin-bottom:14px;width:100%;display:flex;align-items:center;justify-content:center}.seq-btns{display:flex;gap:13px;justify-content:center;flex-wrap:wrap}.sqb{width:78px;height:78px;border-radius:18px;border:3px solid rgba(255,255,255,.24);font-size:2.35rem;background:rgba(255,255,255,.09);cursor:pointer;transition:.13s ease}.sqb:hover{background:rgba(255,255,255,.22);transform:scale(1.06)}.sqb:disabled{opacity:.45;cursor:not-allowed;transform:none}.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%;max-width:390px}.mc{aspect-ratio:1;border-radius:14px;border:2.5px solid rgba(255,255,255,.18);background:rgba(255,255,255,.09);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:2.2rem;transition:.2s ease}.mc.face-down .cf{visibility:hidden}.mc.flipped{background:rgba(255,255,255,.22);transform:scale(1.06)}.mc.matched{background:rgba(80,220,100,.3);border-color:#50dc64;pointer-events:none}.touch-emoji{font-size:6rem;width:150px;height:150px;background:rgba(255,255,255,.08);border-radius:22px;display:flex;align-items:center;justify-content:center;margin-bottom:13px;border:2px solid rgba(255,255,255,.15)}.touch-btns{display:flex;gap:13px;justify-content:center;flex-wrap:wrap}.touch-btn{font-size:1.1rem;padding:13px 25px;border-radius:18px;border:2.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:white;font-family:inherit;cursor:pointer}.spygrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%;max-width:400px}.si{aspect-ratio:1;border-radius:12px;background:rgba(255,255,255,.08);font-size:2rem;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2.5px solid transparent}.si:hover{transform:scale(1.08)}.si.found{background:rgba(80,220,100,.3);border-color:#50dc64}.si.miss{background:rgba(255,80,80,.3);border-color:#ff5050}.bal-char{font-size:4.4rem;margin-bottom:10px;line-height:1}#bbar{position:relative;width:100%;max-width:320px;height:24px;background:rgba(255,255,255,.12);border-radius:12px;margin:10px auto;overflow:hidden}#bfill{position:absolute;top:0;left:50%;transform:translateX(-50%);height:100%;width:10px;background:white;border-radius:6px;transition:left .07s linear}#bbar::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:64px;height:100%;background:rgba(80,220,100,.38);border-radius:6px}.health-habits{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;width:100%}.habit-card{background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.18);border-radius:16px;padding:10px 8px;text-align:center}.hico{font-size:2rem}.hname{font-size:.9rem;font-weight:900}.htxt{font-size:.74rem;color:#d4c8ff;line-height:1.35}.brain-face{font-size:5rem;text-align:center;margin-bottom:8px}.health-meter-bar{width:100%;max-width:310px;height:22px;background:rgba(255,255,255,.1);border-radius:12px;overflow:hidden;border:2px solid #50dc98;margin:6px auto 12px}.health-meter-fill{height:100%;background:linear-gradient(90deg,#50dc98,#ffe066);transition:width .5s;width:0%}.feed-items{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:410px}.feed-item{aspect-ratio:1;border-radius:14px;border:2.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);font-size:2rem;display:flex;align-items:center;justify-content:center;cursor:pointer}.feed-item:hover{transform:scale(1.08)}.feed-item.good{background:rgba(80,220,100,.3);border-color:#50dc64}.feed-item.bad{background:rgba(255,80,80,.25);border-color:#ff5050;animation:shake .4s ease}.feed-item.used{opacity:.35;pointer-events:none}@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}#celeb{display:none;position:fixed;inset:0;z-index:200;pointer-events:none;align-items:center;justify-content:center}#celeb.show{display:flex}.cp{position:absolute;border-radius:2px;animation:cfall linear forwards}@keyframes cfall{0%{opacity:1;transform:translateY(-10px) rotate(0)}100%{opacity:0;transform:translateY(100vh) rotate(720deg)}}#celeb-txt{font-size:clamp(1.25rem,4vw,2.1rem);color:#ffe66d;text-shadow:0 0 20px #ff66c4;text-align:center;padding:24px 30px;background:rgba(5,0,20,.92);border-radius:24px;border:3px solid #ffe66d;pointer-events:auto;line-height:1.5}@media(max-width:600px){#app{padding:12px 8px}.health-habits{grid-template-columns:repeat(2,1fr)}.feed-items{grid-template-columns:repeat(3,1fr)}.brain-label.big{font-size:23px}.brain-label.small{font-size:15px}.brain-label.icon{font-size:28px}.ttl{font-size:2.35rem}.badge{width:42px;height:42px;font-size:1.35rem}.lgbtn .ltxt{display:none}}
+
+body{
+background: radial-gradient(circle at top, #153c8a 0%, #0f1f5c 35%, #140033 100%) !important;
+}
+
+.sr1-badge{
+position: fixed;
+bottom: 18px;
+right: 18px;
+display:flex;
+align-items:center;
+gap:10px;
+background: rgba(255,255,255,0.08);
+backdrop-filter: blur(8px);
+padding:10px 14px;
+border-radius:18px;
+border:1px solid rgba(255,255,255,0.18);
+z-index:9999;
+box-shadow:0 4px 14px rgba(0,0,0,0.25);
+}
+
+.sr1-badge img{
+height:42px;
+width:auto;
+border-radius:8px;
+}
+
+.sr1-credit{
+font-family: Arial, sans-serif;
+color:white;
+font-size:14px;
+line-height:1.2;
+}
+
+.sr1-credit strong{
+color:#8fd3ff;
+}
+
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="ttl">🧠 Brain Superpowers!</div>
+  <div class="sub">Tap a brain part to discover your superpower!</div>
+  <div class="top-bar">
+    <button class="atog" id="atog" onclick="toggleAudio()"><span id="aicon">🔊</span><span id="alabel">Audio ON</span></button>
+    <button class="lab-btn" onclick="openLab()">🧠 Brain Health Lab</button>
+  </div>
+  <div class="meter-wrap">
+    <div class="meter-row"><span>⚡ Brain Power</span><span id="mpct">0 / 5 unlocked</span></div>
+    <div class="meter-bar"><div class="meter-fill" id="mfill">0%</div></div>
+    <div class="prog-msg" id="pmsg">Unlock all 5 superpowers! 🌟</div>
+  </div>
+  <div class="badge-tray">
+    <div class="badge" id="b0"><span>🧩</span><div class="tip">Thinking</div></div>
+    <div class="badge" id="b1"><span>🎵</span><div class="tip">Memory</div></div>
+    <div class="badge" id="b2"><span>✋</span><div class="tip">Touch</div></div>
+    <div class="badge" id="b3"><span>👁️</span><div class="tip">Seeing</div></div>
+    <div class="badge" id="b4"><span>⚡</span><div class="tip">Balance</div></div>
+  </div>
+
+  <div class="brain-stage">
+  <div class="brain-outer">
+<svg viewBox="0 0 720 430" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;overflow:visible">
+<defs>
+  <linearGradient id="gFrontal" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffb15c"/><stop offset="65%" stop-color="#ff7a18"/><stop offset="100%" stop-color="#e95d00"/></linearGradient>
+  <linearGradient id="gTemporal" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#b58cff"/><stop offset="55%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#6636d6"/></linearGradient>
+  <linearGradient id="gParietal" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#54f0f0"/><stop offset="55%" stop-color="#06b6d4"/><stop offset="100%" stop-color="#008ca8"/></linearGradient>
+  <linearGradient id="gOccipital" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff8a8a"/><stop offset="60%" stop-color="#ef4444"/><stop offset="100%" stop-color="#cf2020"/></linearGradient>
+  <linearGradient id="gCereb" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff176"/><stop offset="60%" stop-color="#facc15"/><stop offset="100%" stop-color="#d89a00"/></linearGradient>
+  <linearGradient id="gStem" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f1d3a7"/><stop offset="100%" stop-color="#b98b5d"/></linearGradient>
+  <clipPath id="brainClipNew">
+    <path d="M95,278 C58,248 42,205 54,164 C66,121 103,83 153,67 C194,54 236,58 271,78 C307,43 371,31 427,52 C489,74 527,119 535,169 C573,169 610,191 630,224 C653,264 647,309 618,338 C590,366 545,376 505,361 C486,388 448,403 410,397 C376,391 351,374 338,351 C306,368 263,369 227,352 C193,336 172,311 166,284 C143,292 116,294 95,278 Z"/>
+  </clipPath>
+  <clipPath id="cerebellumClipNew">
+    <path d="M475,320 C488,294 517,279 553,283 C591,287 621,312 627,346 C633,382 609,411 571,420 C533,429 493,414 475,384 C463,363 464,340 475,320 Z"/>
+  </clipPath>
+</defs>
+
+<ellipse cx="370" cy="414" rx="285" ry="13" fill="rgba(4,1,20,0.42)"/>
+
+<!-- Brain stem behind cerebellum -->
+<path d="M484,350 C474,368 467,392 472,410 C477,430 497,439 515,428 C534,417 538,390 529,368 C521,348 502,338 489,344 C487,345 485,347 484,350 Z" fill="url(#gStem)" stroke="#7d5738" stroke-width="2.2"/>
+<path d="M493,352 C489,373 488,397 493,424 M505,349 C502,373 503,400 510,426 M517,356 C519,379 522,400 525,416" fill="none" stroke="#8a6040" stroke-width="1.4" opacity=".45" stroke-linecap="round"/>
+
+<!-- Cerebellum -->
+<g class="lobe" onclick="openZone(4)" tabindex="0" role="button" aria-label="Cerebellum">
+  <path d="M475,320 C488,294 517,279 553,283 C591,287 621,312 627,346 C633,382 609,411 571,420 C533,429 493,414 475,384 C463,363 464,340 475,320 Z" fill="url(#gCereb)" stroke="#1a0828" stroke-width="3"/>
+  <g clip-path="url(#cerebellumClipNew)">
+    <path d="M472,318 C500,303 542,298 579,306 C604,312 622,326 631,344" fill="none" stroke="#8d6500" stroke-width="2.0" opacity=".72" stroke-linecap="round"/>
+    <path d="M467,334 C498,319 541,315 580,322 C606,328 623,343 632,360" fill="none" stroke="#8d6500" stroke-width="1.9" opacity=".70" stroke-linecap="round"/>
+    <path d="M466,350 C499,336 543,331 581,339 C604,344 620,358 626,374" fill="none" stroke="#8d6500" stroke-width="1.8" opacity=".68" stroke-linecap="round"/>
+    <path d="M470,366 C500,354 542,350 576,358 C596,363 611,374 618,388" fill="none" stroke="#8d6500" stroke-width="1.7" opacity=".64" stroke-linecap="round"/>
+    <path d="M480,385 C508,376 543,374 570,381 C588,386 601,395 607,405" fill="none" stroke="#8d6500" stroke-width="1.5" opacity=".58" stroke-linecap="round"/>
+    <path d="M550,284 C548,326 550,372 559,420" fill="none" stroke="#8d6500" stroke-width="1.8" stroke-dasharray="5,4" opacity=".46"/>
+  </g>
+</g>
+
+<g clip-path="url(#brainClipNew)">
+  <g class="lobe" onclick="openZone(0)" tabindex="0" role="button" aria-label="Frontal Lobe">
+    <path d="M95,278 C58,248 42,205 54,164 C66,121 103,83 153,67 C194,54 236,58 271,78 C265,108 255,141 252,174 C249,209 260,239 280,260 C254,272 222,285 190,295 C158,305 121,300 95,278 Z" fill="url(#gFrontal)"/>
+    <path d="M84,130 C112,105 157,97 194,111 C220,121 234,147 225,176" fill="none" stroke="#9a3a00" stroke-width="2.4" opacity=".45" stroke-linecap="round"/>
+    <path d="M68,175 C98,151 145,145 181,160 C207,171 219,200 208,228" fill="none" stroke="#9a3a00" stroke-width="2.4" opacity=".43" stroke-linecap="round"/>
+    <path d="M67,222 C99,200 145,195 180,211 C202,222 211,248 200,272" fill="none" stroke="#9a3a00" stroke-width="2.2" opacity=".4" stroke-linecap="round"/>
+    <path d="M136,70 C171,80 194,107 193,140 C192,167 171,190 143,196" fill="none" stroke="#9a3a00" stroke-width="2.0" opacity=".36" stroke-linecap="round"/>
+    <path d="M182,292 C213,277 248,277 278,292" fill="none" stroke="#9a3a00" stroke-width="2.0" opacity=".32" stroke-linecap="round"/>
+  </g>
+
+  <g class="lobe" onclick="openZone(2)" tabindex="0" role="button" aria-label="Parietal Lobe">
+    <path d="M271,78 C307,43 371,31 427,52 C489,74 527,119 535,169 C522,197 501,222 476,242 C450,263 418,274 383,274 C343,274 307,258 282,231 C258,205 249,172 254,139 C258,113 264,93 271,78 Z" fill="url(#gParietal)"/>
+    <path d="M298,59 C342,62 379,82 400,114 C420,144 417,181 392,207" fill="none" stroke="#006f83" stroke-width="2.3" opacity=".42" stroke-linecap="round"/>
+    <path d="M376,47 C421,58 459,88 476,129 C489,162 480,202 452,226" fill="none" stroke="#006f83" stroke-width="2.3" opacity=".4" stroke-linecap="round"/>
+    <path d="M465,90 C502,122 516,168 498,209" fill="none" stroke="#006f83" stroke-width="2.0" opacity=".36" stroke-linecap="round"/>
+    <path d="M337,232 C360,250 392,255 422,244" fill="none" stroke="#006f83" stroke-width="2.0" opacity=".31" stroke-linecap="round"/>
+  </g>
+
+  <g class="lobe" onclick="openZone(3)" tabindex="0" role="button" aria-label="Occipital Lobe">
+    <path d="M535,169 C573,169 610,191 630,224 C653,264 647,309 618,338 C590,366 545,376 505,361 C486,346 473,321 470,292 C467,260 479,231 501,208 C518,191 529,176 535,169 Z" fill="url(#gOccipital)"/>
+    <path d="M538,181 C570,200 585,237 576,272 C568,303 543,325 511,330" fill="none" stroke="#8d1010" stroke-width="2.3" opacity=".42" stroke-linecap="round"/>
+    <path d="M590,209 C619,239 624,284 602,317" fill="none" stroke="#8d1010" stroke-width="2.1" opacity=".38" stroke-linecap="round"/>
+    <path d="M504,220 C522,245 527,281 515,311" fill="none" stroke="#8d1010" stroke-width="1.9" opacity=".34" stroke-linecap="round"/>
+  </g>
+
+  <g class="lobe" onclick="openZone(1)" tabindex="0" role="button" aria-label="Temporal Lobe">
+    <path d="M166,284 C197,270 235,260 280,252 C326,244 381,244 425,252 C465,259 492,276 505,302 C518,329 508,352 486,370 C461,391 420,400 381,392 C346,385 321,368 306,345 C276,360 235,360 202,344 C177,332 161,310 166,284 Z" fill="url(#gTemporal)"/>
+    <path d="M198,285 C238,269 286,268 326,282 C355,292 370,318 359,345" fill="none" stroke="#4e2196" stroke-width="2.4" opacity=".42" stroke-linecap="round"/>
+    <path d="M304,272 C353,258 407,263 446,287 C473,304 480,335 461,361" fill="none" stroke="#4e2196" stroke-width="2.4" opacity=".40" stroke-linecap="round"/>
+    <path d="M218,330 C257,349 303,347 338,324" fill="none" stroke="#4e2196" stroke-width="2.1" opacity=".34" stroke-linecap="round"/>
+    <path d="M371,354 C404,366 444,361 470,338" fill="none" stroke="#4e2196" stroke-width="2.0" opacity=".32" stroke-linecap="round"/>
+  </g>
+</g>
+
+<path d="M95,278 C58,248 42,205 54,164 C66,121 103,83 153,67 C194,54 236,58 271,78 C307,43 371,31 427,52 C489,74 527,119 535,169 C573,169 610,191 630,224 C653,264 647,309 618,338 C590,366 545,376 505,361 C486,388 448,403 410,397 C376,391 351,374 338,351 C306,368 263,369 227,352 C193,336 172,311 166,284 C143,292 116,294 95,278 Z" fill="none" stroke="#1a0828" stroke-width="3.5" stroke-linejoin="round"/>
+
+<path d="M271,78 C257,114 246,158 254,198 C260,232 283,257 315,270" fill="none" stroke="#1a0828" stroke-width="2.5" opacity=".68" stroke-linecap="round"/>
+<path d="M535,169 C516,205 504,245 507,282 C510,313 524,340 548,358" fill="none" stroke="#1a0828" stroke-width="2.3" opacity=".62" stroke-linecap="round"/>
+<path d="M166,284 C207,264 258,252 315,246 C363,241 416,246 468,262" fill="none" stroke="#1a0828" stroke-width="2.3" opacity=".65" stroke-linecap="round"/>
+
+<g font-family="'Comic Sans MS','Chalkboard SE',cursive" text-anchor="middle" fill="white" stroke="#1a0828" paint-order="stroke" stroke-linejoin="round">
+  <text x="170" y="168" font-size="22" font-weight="bold" stroke-width="4">🧩</text>
+  <text x="170" y="194" font-size="22" font-weight="bold" stroke-width="4">Thinking</text>
+  <text x="170" y="216" font-size="13" font-weight="bold" stroke-width="3">FRONTAL</text>
+  <text x="395" y="145" font-size="23" font-weight="bold" stroke-width="4">✋</text>
+  <text x="395" y="172" font-size="22" font-weight="bold" stroke-width="4">Touch</text>
+  <text x="395" y="194" font-size="13" font-weight="bold" stroke-width="3">PARIETAL</text>
+  <text x="340" y="310" font-size="23" font-weight="bold" stroke-width="4">🎵</text>
+  <text x="340" y="338" font-size="23" font-weight="bold" stroke-width="4">Memory</text>
+  <text x="340" y="360" font-size="13" font-weight="bold" stroke-width="3">TEMPORAL</text>
+  <text x="562" y="263" font-size="23" font-weight="bold" stroke-width="4">👁️</text>
+  <text x="562" y="291" font-size="21" font-weight="bold" stroke-width="4">Seeing</text>
+  <text x="562" y="313" font-size="12" font-weight="bold" stroke-width="3">OCCIPITAL</text>
+  <text x="550" y="343" font-size="20" font-weight="bold" stroke-width="4">⚡</text>
+  <text x="550" y="370" font-size="19" font-weight="bold" stroke-width="4">Balance</text>
+  <text x="550" y="390" font-size="11" font-weight="bold" stroke-width="3">CEREBELLUM</text>
+</g>
+
+<g style="pointer-events:all">
+  <path class="lobe" onclick="openZone(0)" tabindex="0" role="button" aria-label="Frontal Lobe" fill="transparent" pointer-events="all" d="M95,278 C58,248 42,205 54,164 C66,121 103,83 153,67 C194,54 236,58 271,78 C265,108 255,141 252,174 C249,209 260,239 280,260 C254,272 222,285 190,295 C158,305 121,300 95,278 Z"/>
+  <path class="lobe" onclick="openZone(2)" tabindex="0" role="button" aria-label="Parietal Lobe" fill="transparent" pointer-events="all" d="M271,78 C307,43 371,31 427,52 C489,74 527,119 535,169 C522,197 501,222 476,242 C450,263 418,274 383,274 C343,274 307,258 282,231 C258,205 249,172 254,139 C258,113 264,93 271,78 Z"/>
+  <path class="lobe" onclick="openZone(3)" tabindex="0" role="button" aria-label="Occipital Lobe" fill="transparent" pointer-events="all" d="M535,169 C573,169 610,191 630,224 C653,264 647,309 618,338 C590,366 545,376 505,361 C486,346 473,321 470,292 C467,260 479,231 501,208 C518,191 529,176 535,169 Z"/>
+  <path class="lobe" onclick="openZone(1)" tabindex="0" role="button" aria-label="Temporal Lobe" fill="transparent" pointer-events="all" d="M166,284 C197,270 235,260 280,252 C326,244 381,244 425,252 C465,259 492,276 505,302 C518,329 508,352 486,370 C461,391 420,400 381,392 C346,385 321,368 306,345 C276,360 235,360 202,344 C177,332 161,310 166,284 Z"/>
+  <path class="lobe" onclick="openZone(4)" tabindex="0" role="button" aria-label="Cerebellum" fill="transparent" pointer-events="all" d="M475,320 C488,294 517,279 553,283 C591,287 621,312 627,346 C633,382 609,411 571,420 C533,429 493,414 475,384 C463,363 464,340 475,320 Z"/>
+</g>
+</svg>
+</div>
+
+  <div class="legend">
+    <button class="lgbtn" style="border-color:var(--frontal);color:#ffcb8b" onclick="openZone(0)"><span>🧩</span><span class="ltxt">Frontal — Thinking</span></button>
+    <button class="lgbtn" style="border-color:var(--temporal);color:#d8b4fe" onclick="openZone(1)"><span>🎵</span><span class="ltxt">Temporal — Memory</span></button>
+    <button class="lgbtn" style="border-color:var(--parietal);color:#9bf4ff" onclick="openZone(2)"><span>✋</span><span class="ltxt">Parietal — Touch</span></button>
+    <button class="lgbtn" style="border-color:var(--occipital);color:#ffc2c8" onclick="openZone(3)"><span>👁️</span><span class="ltxt">Occipital — Seeing</span></button>
+    <button class="lgbtn" style="border-color:var(--cerebellum);color:#fff18a" onclick="openZone(4)"><span>⚡</span><span class="ltxt">Cerebellum — Balance</span></button>
+  </div>
+  <div class="tips">
+    <div class="tip"><span>😴</span>Sleep grows your brain!</div>
+    <div class="tip"><span>💧</span>Water = brain power!</div>
+    <div class="tip"><span>🏃</span>Move to boost your brain!</div>
+    <div class="tip"><span>🥦</span>Good food fuels your brain!</div>
+  </div>
+</div>
+
+<div class="ov" id="ov" role="dialog" aria-modal="true">
+  <div class="panel" id="panel">
+    <button class="pcls" onclick="closePanel()">✕</button>
+    <div class="ph"><div class="pibox" id="pibox"><span id="picon"></span><button class="pispk" id="pispk" onclick="speakCurrent()">🔊</button></div><div><div class="ptitle" id="ptitle"></div><div class="psub" id="psub"></div></div></div>
+    <div class="pdesc" id="pdesc"></div>
+    <div class="pfact" id="pfact"><span class="fi">💡</span><span id="pfacttext"></span></div>
+    <div class="mgwrap"><div class="mgtitle" id="mgtitle"></div><div class="mgbody" id="mgbody"></div></div>
+  </div>
+</div>
+
+<div class="ov" id="labov" role="dialog" aria-modal="true">
+  <div class="panel" style="border-color:#50dc98;max-width:720px">
+    <button class="pcls" onclick="closeLab()">✕</button>
+    <div class="ph"><div class="pibox" style="border-color:#50dc98;font-size:2.2rem">🧪</div><div><div class="ptitle" style="color:#50dc98">🧠 Brain Health Lab</div><div class="psub">Learn what keeps your brain strong!</div></div></div>
+    <div class="health-habits">
+      <div class="habit-card"><div class="hico">😴</div><div class="hname">Sleep</div><div class="htxt">Sleep helps your brain rest, grow, and remember.</div></div>
+      <div class="habit-card"><div class="hico">💧</div><div class="hname">Water</div><div class="htxt">Water helps your brain stay focused.</div></div>
+      <div class="habit-card"><div class="hico">🍎🥦</div><div class="hname">Healthy Food</div><div class="htxt">Fruits, veggies, and protein fuel your brain.</div></div>
+      <div class="habit-card"><div class="hico">🏃</div><div class="hname">Exercise</div><div class="htxt">Moving your body wakes up your brain.</div></div>
+      <div class="habit-card"><div class="hico">🌬️</div><div class="hname">Breathing</div><div class="htxt">Slow breaths help your brain calm down.</div></div>
+      <div class="habit-card"><div class="hico">⏰</div><div class="hname">Brain Breaks</div><div class="htxt">Your brain needs breaks from screens.</div></div>
+    </div>
+    <div class="mgwrap"><div class="mgtitle">🎮 Feed the Brain! — Tap the healthy choices!</div><div class="mgbody" id="labgame"><div class="brain-face" id="labface">😐</div><div style="font-size:.85rem;color:#c9b3ff;margin-bottom:4px">Brain Health Meter</div><div class="health-meter-bar"><div class="health-meter-fill" id="hmfill"></div></div><div id="labscore" style="text-align:center;font-size:.85rem;margin-bottom:10px;min-height:20px;color:#b0a0ff"></div><div class="feed-items" id="feedItems"></div><div id="labfb" style="text-align:center;font-size:.95rem;min-height:28px;margin-top:8px"></div></div></div>
+  </div>
+</div>
+<div id="celeb"><div id="celeb-txt"></div></div>
+
+<script>
+const ZONES=[
+  {name:'Frontal Lobe',speak:'The Frontal Lobe is your thinking brain. It helps you make smart choices, plan ahead, and solve tricky problems.',label:'🧩 Thinking Brain!',color:'#ff8a1f',factBg:'rgba(255,138,31,.14)',badgeId:'b0',icon:'🧩',game:'sequence',desc:'Your Frontal Lobe is your THINKING superpower! Every time you stop and think before acting, your frontal lobe is working.',fact:'Your frontal lobe keeps growing into young adulthood. That is why practice and learning are powerful. 🌱',winSpeak:'Fantastic! You just used your thinking superpower!'},
+  {name:'Temporal Lobe',speak:'The Temporal Lobe is your memory and music brain. It helps you remember things and understand sounds.',label:'🎵 Memory & Music Brain!',color:'#a855f7',factBg:'rgba(168,85,247,.14)',badgeId:'b1',icon:'🎵',game:'memory',desc:'Your Temporal Lobe is your MEMORY superpower! It helps with sounds, music, words, and favorite memories.',fact:'Songs can help your brain remember information because music and memory work closely together. 🎼',winSpeak:'Wonderful! You unlocked the memory superpower!'},
+  {name:'Parietal Lobe',speak:'The Parietal Lobe is your touch and sensory brain. It feels hot, cold, soft, and rough.',label:'✋ Touch & Sensory Brain!',color:'#18c8d6',factBg:'rgba(24,200,214,.14)',badgeId:'b2',icon:'✋',game:'touch',desc:'Your Parietal Lobe feels touch, temperature, and where your body is in space.',fact:'Your fingertips have lots of touch sensors, so they are great at noticing tiny details. 👆',winSpeak:'Excellent! You unlocked the touch superpower!'},
+  {name:'Occipital Lobe',speak:'The Occipital Lobe is your seeing brain. It turns signals from your eyes into colors and shapes.',label:'👁️ Seeing Brain!',color:'#ff5363',factBg:'rgba(255,83,99,.14)',badgeId:'b3',icon:'👁️',game:'ispy',desc:'Your Occipital Lobe is your VISION superpower! It helps your brain understand colors, shapes, and faces.',fact:'Your brain works with your eyes to make sense of what you see. 🙃',winSpeak:'Incredible! You unlocked the seeing superpower!'},
+  {name:'Cerebellum',speak:'The Cerebellum is your balance and movement brain. It keeps you steady when you walk, dance, and run.',label:'⚡ Balance & Movement Brain!',color:'#ffd21f',factBg:'rgba(255,210,31,.16)',badgeId:'b4',icon:'⚡',game:'balance',desc:'Your Cerebellum coordinates movement. Walking, dancing, and catching a ball all use this balance superpower.',fact:'The cerebellum is small but mighty. It helps make your movements smooth and steady. 💪',winSpeak:'Fantastic! You unlocked the balance superpower!'}
+];
+const FEED_ITEMS=[{e:'😴',label:'Good Sleep',good:true},{e:'💧',label:'Water',good:true},{e:'🍎',label:'Apple',good:true},{e:'🥦',label:'Broccoli',good:true},{e:'🏃',label:'Exercise',good:true},{e:'📖',label:'Reading',good:true},{e:'🌬️',label:'Breathing',good:true},{e:'🛝',label:'Playing Outside',good:true},{e:'🍬',label:'Too Much Candy',good:false},{e:'📱',label:'Too Much Screen',good:false},{e:'🛋️',label:'Sitting All Day',good:false},{e:'😡',label:'No Sleep',good:false}];
+let earned=new Set(),curZone=-1,mgState={},audioOn=true,labScore=0,labDone=false,bv=null;
+function toggleAudio(){audioOn=!audioOn;document.getElementById('aicon').textContent=audioOn?'🔊':'🔇';document.getElementById('alabel').textContent=audioOn?'Audio ON':'Audio OFF';document.getElementById('atog').classList.toggle('muted',!audioOn);let sp=document.getElementById('pispk');if(sp)sp.style.display=audioOn?'flex':'none';if(!audioOn&&speechSynthesis)speechSynthesis.cancel()}
+function lv(){if(!window.speechSynthesis)return;let vv=speechSynthesis.getVoices();bv=vv.find(v=>/google us english/i.test(v.name))||vv.find(v=>/samantha|karen|moira|tessa/i.test(v.name))||vv.find(v=>v.lang==='en-US'&&v.localService)||vv.find(v=>/en[-_]/i.test(v.lang))||null}if(window.speechSynthesis){lv();speechSynthesis.onvoiceschanged=lv}
+function speak(t,r=.82,p=1.06){if(!audioOn||!window.speechSynthesis)return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.rate=r;u.pitch=p;u.volume=1;if(bv)u.voice=bv;speechSynthesis.speak(u)}
+function speakCurrent(){if(curZone>=0)speak(ZONES[curZone].speak,.8,1.08)}
+function openZone(idx){curZone=idx;let z=ZONES[idx];panel.style.borderColor=z.color;picon.textContent=z.icon;pibox.style.borderColor=z.color;pispk.style.borderColor=z.color;pispk.style.display=audioOn?'flex':'none';ptitle.textContent=z.label;ptitle.style.color=z.color;psub.textContent=z.name;pdesc.textContent=z.desc;pfact.style.background=z.factBg;pfacttext.textContent=z.fact;loadGame(z.game);ov.classList.add('show');document.body.style.overflow='hidden';if(audioOn)setTimeout(()=>speak(z.speak,.82,1.06),400)}
+function closePanel(){ov.classList.remove('show');document.body.style.overflow='';if(mgState.iv)clearInterval(mgState.iv);if(window.speechSynthesis)speechSynthesis.cancel();mgState={}}
+ov.addEventListener('click',e=>{if(e.target===ov)closePanel()});document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePanel();closeLab()}});
+function openLab(){labScore=0;labDone=false;buildFeedGame();labov.classList.add('show');document.body.style.overflow='hidden';if(audioOn)setTimeout(()=>speak('Welcome to the Brain Health Lab! Tap the healthy choices to feed your brain!',.82,1.06),350)}
+function closeLab(){labov.classList.remove('show');document.body.style.overflow='';if(window.speechSynthesis)speechSynthesis.cancel()}labov.addEventListener('click',e=>{if(e.target===labov)closeLab()});
+function earnBadge(idx){if(earned.has(idx))return;earned.add(idx);document.getElementById(ZONES[idx].badgeId).classList.add('earned');let pct=Math.round(earned.size/5*100);mfill.style.width=pct+'%';mfill.textContent=pct+'%';mpct.textContent=earned.size+' / 5 unlocked';let msgs=['','1 down, 4 to go! 🌟','Halfway there! 🔥','3 superpowers! ⚡','One more! 🏆','BRAIN MASTER! 🏆'];pmsg.textContent=msgs[earned.size]||'';if(earned.size===5)setTimeout(()=>{celebrate('🧠 BRAIN MASTER! 🏆\nAll 5 superpowers unlocked!');speak('You are a Brain Master! You unlocked all five superpowers!',.84,1.1)},600)}
+function loadGame(t){mgState={};mgbody.innerHTML='';mgtitle.textContent='';if(t==='sequence')buildSeq();if(t==='memory')buildMem();if(t==='touch')buildTouch();if(t==='ispy')buildISpy();if(t==='balance')buildBal()}
+function buildSeq(){
+  mgtitle.innerHTML='🧩 Copy the Pattern — 3 Rounds!';
+  mgState={round:1,totalRounds:3,seq:[],player:[],phase:'ready'};
+  mgbody.innerHTML=`
+    <div style='text-align:center;width:100%'>
+      <div style='font-size:4.7rem;margin-bottom:12px;line-height:1'>🧩</div>
+      <p style='font-size:1rem;opacity:.85;margin-bottom:10px;line-height:1.5'>Use your Thinking Brain!<br>Click Start, watch slowly, then copy the pattern.</p>
+      <div style='font-size:.9rem;color:#ffe66d;margin-bottom:12px'>Round 1 of 3</div>
+      <button class='gb start-btn' onclick='startSeqRound()'>▶️ Start Round 1</button>
+    </div>`;
+}
+function startSeqRound(){
+  const syms=['🌟','🎈','🦋','🍎'];
+  const len=mgState.round+2; // Round 1=3, Round 2=4, Round 3=5
+  const seq=Array.from({length:len},()=>syms[Math.floor(Math.random()*syms.length)]);
+  mgState.seq=seq;mgState.player=[];mgState.phase='show';
+  mgbody.innerHTML=`
+    <div style='width:100%;text-align:center'>
+      <p style='font-size:.9rem;opacity:.75;margin-bottom:8px'>Round ${mgState.round} of ${mgState.totalRounds}</p>
+      <div class='seq-display' id='sd'>Get ready...</div>
+      <div class='seq-btns'>${syms.map(e=>`<button class='sqb' onclick='sqTap("${e}")' disabled>${e}</button>`).join('')}</div>
+      <div id='sfb' style='text-align:center;font-size:.98rem;margin-top:10px;min-height:28px;color:#c9b3ff'>👀 Watch carefully...</div>
+    </div>`;
+  setTimeout(()=>showSeq(seq),650);
+}
+function showSeq(seq){
+  const sd=document.getElementById('sd'), fb=document.getElementById('sfb');
+  if(!sd)return;
+  let i=0;
+  mgState.phase='show';
+  mgState.player=[];
+  sd.textContent='';
+  fb.textContent='👀 Watch slowly...';
+  const showTime=950;  // slower pattern speed
+  const gapTime=300;
+  function showNext(){
+    if(!document.getElementById('sd'))return;
+    if(i>=seq.length){
+      sd.textContent='❓ ❓ ❓';
+      fb.textContent='👆 Now tap the pattern!';
+      mgState.phase='input';
+      document.querySelectorAll('.sqb').forEach(b=>b.disabled=false);
+      return;
+    }
+    sd.textContent=seq[i];
+    i++;
+    setTimeout(()=>{if(document.getElementById('sd'))sd.textContent='';setTimeout(showNext,gapTime);},showTime);
+  }
+  showNext();
+}
+function sqTap(e){
+  if(mgState.phase!=='input')return;
+  mgState.player.push(e);
+  const p=mgState.player.length-1, fb=document.getElementById('sfb'), sd=document.getElementById('sd');
+  if(e!==mgState.seq[p]){
+    fb.textContent='😅 Oops! Try this round again.';
+    sd.textContent='🔁';
+    mgState.player=[];
+    mgState.phase='ready';
+    document.querySelectorAll('.sqb').forEach(b=>b.disabled=true);
+    setTimeout(()=>{
+      if(!document.getElementById('sfb'))return;
+      mgbody.innerHTML=`
+        <div style='text-align:center;width:100%'>
+          <div style='font-size:4rem;margin-bottom:10px'>🧩</div>
+          <p style='font-size:1rem;margin-bottom:8px'>No worries — try Round ${mgState.round} again!</p>
+          <button class='gb start-btn' onclick='startSeqRound()'>▶️ Restart Round ${mgState.round}</button>
+        </div>`;
+    },900);
+    return;
+  }
+  if(mgState.player.length===mgState.seq.length){
+    document.querySelectorAll('.sqb').forEach(b=>b.disabled=true);
+    fb.innerHTML="<span style='color:#b0ffbb'>🎉 Perfect!</span>";
+    if(mgState.round<mgState.totalRounds){
+      mgState.round++;
+      mgState.phase='ready';
+      setTimeout(()=>{
+        if(!document.getElementById('sfb'))return;
+        mgbody.innerHTML=`
+          <div style='text-align:center;width:100%'>
+            <div style='font-size:4.3rem;margin-bottom:10px'>⭐</div>
+            <p style='font-size:1.05rem;margin-bottom:8px'>Great job! Ready for Round ${mgState.round}?</p>
+            <div style='font-size:.9rem;color:#ffe66d;margin-bottom:12px'>Round ${mgState.round} of ${mgState.totalRounds}</div>
+            <button class='gb start-btn' onclick='startSeqRound()'>▶️ Start Round ${mgState.round}</button>
+          </div>`;
+      },900);
+    }else{
+      earnBadge(curZone);
+      speak(ZONES[curZone].winSpeak,.84,1.1);
+      setTimeout(()=>celebrate('🧩 Thinking Superpower\nUNLOCKED! 🎉'),500);
+    }
+  }else{
+    fb.textContent=`✅ Good! ${mgState.player.length}/${mgState.seq.length}`;
+  }
+}
+function buildMem(){mgtitle.innerHTML='🎵 Memory Match!';let pairs=['🎸','🎺','🥁','🎹'],deck=shuffle(pairs.concat(pairs));mgState={deck,flipped:[],matched:0,busy:false};mgbody.innerHTML="<div class='mgrid'>"+deck.map((e,i)=>`<div class='mc face-down' id='mc${i}' data-e='${e}' onclick='flipCard(${i})'><span class='cf'>${e}</span></div>`).join('')+"</div><div id='mfb' style='text-align:center;margin-top:10px;font-size:.95rem;min-height:22px'></div>"}
+function flipCard(i){if(mgState.busy)return;let el=document.getElementById('mc'+i);if(!el||el.classList.contains('matched')||!el.classList.contains('face-down'))return;el.classList.remove('face-down');el.classList.add('flipped');mgState.flipped.push({i,e:el.dataset.e,el});if(mgState.flipped.length===2){mgState.busy=true;let [a,b]=mgState.flipped,fb=document.getElementById('mfb');if(a.e===b.e){a.el.classList.replace('flipped','matched');b.el.classList.replace('flipped','matched');mgState.matched+=2;mgState.flipped=[];mgState.busy=false;fb.textContent=mgState.matched===8?'🎉 All pairs found!':'✅ Match!';if(mgState.matched===8){earnBadge(curZone);speak(ZONES[curZone].winSpeak,.84,1.1);setTimeout(()=>celebrate('🎵 Memory Superpower\nUNLOCKED! 🎶'),500)}}else{fb.textContent='😅 Not a match!';setTimeout(()=>{a.el.classList.remove('flipped');a.el.classList.add('face-down');b.el.classList.remove('flipped');b.el.classList.add('face-down');mgState.flipped=[];mgState.busy=false;fb.textContent=''},850)}}}
+function buildTouch(){mgtitle.innerHTML='✋ Soft or Rough?';let items=[{e:'🧸',label:'Teddy Bear',ans:'soft'},{e:'🪨',label:'Rock',ans:'rough'},{e:'🌸',label:'Flower Petal',ans:'soft'},{e:'🌵',label:'Cactus',ans:'rough'},{e:'🐱',label:'Kitten Fur',ans:'soft'},{e:'🪵',label:'Tree Bark',ans:'rough'},{e:'☁️',label:'Cloud',ans:'soft'},{e:'🦔',label:'Hedgehog',ans:'rough'}];mgState={qs:shuffle(items).slice(0,5),idx:0,correct:0};showTQ()}
+function showTQ(){if(mgState.idx>=mgState.qs.length){mgbody.innerHTML=`<div class='mg-result ${mgState.correct>=3?'win':'lose'}'>🎉 ${mgState.correct}/${mgState.qs.length} correct!<br>Your touch brain rocks!</div>`;earnBadge(curZone);speak(ZONES[curZone].winSpeak,.84,1.1);setTimeout(()=>celebrate('✋ Touch Superpower\nUNLOCKED! 🖐️'),500);return}let it=mgState.qs[mgState.idx];mgbody.innerHTML=`<p style='font-size:.8rem;opacity:.65;margin-bottom:10px'>Question ${mgState.idx+1} of ${mgState.qs.length}</p><div class='touch-emoji'>${it.e}</div><p style='font-size:1.1rem;margin-bottom:16px;text-align:center'>What does <b>${it.label}</b> feel like?</p><div class='touch-btns'><button class='touch-btn' onclick='tAns("soft")'>🤗 Soft</button><button class='touch-btn' onclick='tAns("rough")'>🪨 Rough</button></div><div id='tfb' style='text-align:center;margin-top:12px;font-size:1rem;min-height:24px'></div>`}
+function tAns(a){let it=mgState.qs[mgState.idx],fb=document.getElementById('tfb');document.querySelectorAll('.touch-btn').forEach(b=>b.disabled=true);if(a===it.ans){mgState.correct++;fb.innerHTML="<span style='color:#b0ffbb'>✅ Correct!</span>"}else fb.innerHTML=`<span style='color:#ffb0b0'>❌ It is ${it.ans}!</span>`;mgState.idx++;setTimeout(showTQ,1000)}
+function buildISpy(){mgtitle.innerHTML='👁️ I Spy!';let pool=['🍎','🌟','🐸','🎈','🦋','🍕','🌙','🚀','🌸','🐶','🦄','🌈','🎀','🐠','🍦'],rounds=[{find:'🌟',label:'a star ⭐'},{find:'🦋',label:'a butterfly 🦋'},{find:'🚀',label:'a rocket 🚀'}];mgState={rounds,pool,ri:0};showSpy()}
+function showSpy(){if(mgState.ri>=mgState.rounds.length){mgbody.innerHTML="<div class='mg-result win'>🌈 Amazing eyes!<br>You found everything!</div>";earnBadge(curZone);speak(ZONES[curZone].winSpeak,.84,1.1);setTimeout(()=>celebrate('👁️ Seeing Superpower\nUNLOCKED! 🌈'),500);return}let r=mgState.rounds[mgState.ri],arr=shuffle(mgState.pool.slice());mgbody.innerHTML=`<p style='font-size:1.05rem;margin-bottom:12px;text-align:center'>Find <span style='font-size:1.8rem'>${r.find}</span> — ${r.label}!</p><div class='spygrid'>${arr.map(e=>`<div class='si' data-e='${e}' onclick='spyTap(this,"${r.find}")'>${e}</div>`).join('')}</div><div id='sfb2' style='text-align:center;font-size:.95rem;min-height:22px'></div>`}
+function spyTap(el,find){let fb=document.getElementById('sfb2');if(el.dataset.e===find){el.classList.add('found');fb.innerHTML="<span style='color:#b0ffbb'>✅ Found it!</span>";mgState.ri++;setTimeout(showSpy,850)}else{el.classList.add('miss');setTimeout(()=>el.classList.remove('miss'),450);fb.textContent='Keep looking! 🔍'}}
+function buildBal(){mgtitle.innerHTML='⚡ Balance Challenge!';mgbody.innerHTML="<div style='text-align:center;width:100%'><div id='bchar' class='bal-char'>🤸</div><div id='bbar'><div id='bfill'></div></div><div style='display:flex;justify-content:space-between;font-size:.75rem;opacity:.6;max-width:320px;margin:4px auto 14px'><span>⬅️ Left</span><span style='color:#50dc98;font-weight:bold'>✅ CENTER</span><span>Right ➡️</span></div><button class='gb' id='bstart' onclick='balStart()'>▶️ Start!</button><button class='gb' id='btap' onclick='balTap()' style='display:none;font-size:1.8rem;padding:18px 40px;border-color:#50dc98;background:rgba(80,220,152,.18)'>👆 TAP!</button><p style='font-size:.85rem;opacity:.65;margin-top:12px'>Tap when bar is in GREEN zone! (5 tries)</p><div id='bsc' style='text-align:center;font-size:.95rem;margin-top:8px;min-height:22px'></div></div>";mgState={pos:50,dir:1,correct:0,total:0,running:false}}
+function balStart(){bstart.style.display='none';btap.style.display='inline-block';mgState.running=true;mgState.pos=50;mgState.dir=1;mgState.iv=setInterval(()=>{if(!document.getElementById('bfill')){clearInterval(mgState.iv);return}mgState.pos+=mgState.dir*2.8;if(mgState.pos>=100||mgState.pos<=0)mgState.dir*=-1;bfill.style.left=mgState.pos+'%';bchar.textContent=Math.abs(mgState.pos-50)<15?'🤸':(mgState.pos<35?'😰':'😱')},55)}
+function balTap(){if(!mgState.running)return;mgState.total++;let good=Math.abs(mgState.pos-50)<24;if(good)mgState.correct++;bsc.textContent=`✅ ${mgState.correct} / ${mgState.total} — ${good?'Great!':'A bit off!'}`;if(mgState.total>=5){clearInterval(mgState.iv);mgState.running=false;btap.disabled=true;let win=mgState.correct>=3;setTimeout(()=>bsc.innerHTML=`<div class='mg-result ${win?'win':'lose'}'>${win?'🎉 Incredible balance! Superstar!':'💪 Great try! Keep practicing!'}</div>`,250);earnBadge(curZone);speak(ZONES[curZone].winSpeak,.84,1.1);if(win)setTimeout(()=>celebrate('⚡ Balance Superpower\nUNLOCKED! 🤸'),700)}}
+function buildFeedGame(){let items=shuffle(FEED_ITEMS.slice());labface.textContent='😐';hmfill.style.width='0%';labscore.textContent='Make healthy choices for your brain!';labfb.textContent='';feedItems.innerHTML=items.map(it=>`<div class='feed-item' data-good='${it.good}' data-label='${it.label}' onclick='feedTap(this)' title='${it.label}'>${it.e}</div>`).join('')}
+function feedTap(el){if(el.classList.contains('used'))return;el.classList.add('used');let good=el.dataset.good==='true',label=el.dataset.label;if(good){labScore++;el.classList.add('good');labfb.innerHTML=`<span style='color:#b0ffbb'>🌟 Great choice! Your brain loves ${label}!</span>`;if(audioOn)speak(label+' is great for your brain!',.84,1.1)}else{el.classList.add('bad');labfb.innerHTML="<span style='color:#ffcc88'>😅 Try again — your brain wants a healthier choice!</span>"}let pct=Math.min(100,Math.round(labScore/8*100));hmfill.style.width=pct+'%';labface.textContent=pct>=80?'🤩':pct>=50?'😊':pct>=25?'😐':'😕';labscore.textContent=`Healthy choices: ${labScore} / 8`;if(labScore>=8&&!labDone){labDone=true;setTimeout(()=>{celebrate('🥦 Healthy Brain Hero! 🏆\nYour brain is super healthy!');speak('Amazing! You are a Healthy Brain Hero!',.84,1.1)},600)}}
+function celebrate(msg){celeb_txt=undefined;document.getElementById('celeb-txt').innerHTML=msg.replace('\n','<br>');celeb.classList.add('show');let cols=['#ff8a1f','#a855f7','#18c8d6','#ff5363','#ffd21f','#fff'];for(let i=0;i<80;i++){let p=document.createElement('div');p.className='cp';p.style.cssText=`left:${Math.random()*100}vw;background:${cols[i%cols.length]};top:-12px;width:${8+Math.random()*9}px;height:${8+Math.random()*9}px;animation-duration:${2+Math.random()*2.5}s;animation-delay:${Math.random()*.8}s`;celeb.appendChild(p)}setTimeout(()=>{celeb.classList.remove('show');celeb.querySelectorAll('.cp').forEach(p=>p.remove())},3400)}
+function shuffle(a){let b=a.slice();for(let i=b.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
+</script>
+
+<div class="sr1-badge">
+  <div class="sr1-credit">
+    <div><strong>Made by Kitty Huang</strong></div>
+    <div>SR1 STEM Learning Designer</div>
+  </div>
+</div>
+
+</body>
+</html>
